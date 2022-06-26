@@ -275,6 +275,7 @@ function Game(props: GameProps) {
             }
 
           })
+          setQueryObj(cObj);
           user.functions.queryMongoDB(cObj).then(x=>{console.log('x',x)});
         }
 

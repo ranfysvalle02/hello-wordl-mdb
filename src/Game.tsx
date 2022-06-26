@@ -16,6 +16,10 @@ import {
   urlParam,
 } from "./util";
 import { decode, encode } from "./base64";
+import * as Realm from "realm-web";
+const REALM_APP_ID = "wordleservice-lxqoh";
+const app = new Realm.App({ id: REALM_APP_ID });
+
 
 enum GameState {
   Playing,
@@ -83,6 +87,43 @@ function parseUrlGameNumber(): number {
 }
 
 function Game(props: GameProps) {
+  const [user, setUser] = useState(app.currentUser);
+  
+  useEffect(() => {
+  
+    async function login() {
+      let u = await app.logIn(Realm.Credentials.anonymous());
+      setUser(u);
+      console.log('user',u);
+    }
+    
+    if (!user) {
+      login();
+    }else{
+      console.log('user',user);
+      
+    }
+  
+  }, [])
+  const [queryObj,setQueryObj] = useState({
+    "resultLimit": 100,
+    "mustHaveLetters" : [],
+    "mustNotHaveLetters" : [],
+    "badPositions" : {
+      "0" : [],
+      "1" : [],
+      "2" : [],
+      "3" : [],
+      "4" : []
+    },
+    "goodPositions" : {
+      "0" : null,
+      "1" : null,
+      "2" : null,
+      "3" : null,
+      "4" : null
+    }
+  });
   const [gameState, setGameState] = useState(GameState.Playing);
   const [guesses, setGuesses] = useState<string[]>([]);
   const [currentGuess, setCurrentGuess] = useState<string>("");
@@ -190,6 +231,7 @@ function Game(props: GameProps) {
           return;
         }
       }
+      
       setGuesses((guesses) => guesses.concat([currentGuess]));
       setCurrentGuess((guess) => "");
 
@@ -207,6 +249,35 @@ function Game(props: GameProps) {
       } else {
         setHint("");
         speak(describeClue(clue(currentGuess, target)));
+        console.log('currentGuess',currentGuess);
+        console.log('target',target);
+        console.log('clue',clue(currentGuess, target));
+        console.log('describe',describeClue(clue(currentGuess, target)));
+        //from the describe, lets build a query
+        if(user){
+          let cObj = JSON.parse(JSON.stringify(queryObj)); //quick clone 
+          console.log('cObj',cObj)
+          let clu = clue(currentGuess, target);
+          console.log('clu',clu);
+          clu.forEach((c,index)=>{
+            console.log('c',c);
+            console.log('index',index);
+            if(c.clue == 0){
+              cObj.mustNotHaveLetters.push(c.letter);
+            }
+            if(c.clue == 1){
+              cObj.mustHaveLetters.push(c.letter);
+              cObj.badPositions[String(index)].push(c.letter);
+            }
+            if(c.clue == 2){
+              cObj.mustHaveLetters.push(c.letter);
+              cObj.goodPositions[String(index)] = String(c.letter);
+            }
+
+          })
+          user.functions.queryMongoDB(cObj).then(x=>{console.log('x',x)});
+        }
+
       }
     }
   };

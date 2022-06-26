@@ -4,6 +4,7 @@ import Game from "./Game";
 import { useEffect, useState } from "react";
 import { About } from "./About";
 
+
 function useSetting<T>(
   key: string,
   initial: T
@@ -46,6 +47,7 @@ function App() {
     "qwertyuiop-asdfghjkl-BzxcvbnmE"
   );
   const [enterLeft, setEnterLeft] = useSetting<boolean>("enter-left", false);
+  
 
   useEffect(() => {
     document.body.className = dark ? "dark" : "";

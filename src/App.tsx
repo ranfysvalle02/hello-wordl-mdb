@@ -92,7 +92,7 @@ function App() {
           <>
             {link("❓", "About", "about")}
             {link("⚙️", "Settings", "settings")}
-            {link("🦠🍃", "Hack", "hack")}
+            {link("🦠", "Hack", "hack")}
           </>
         )}
       </div>

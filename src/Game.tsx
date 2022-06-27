@@ -250,11 +250,11 @@ function Game(props: GameProps) {
         setHint("");
         speak(describeClue(clue(currentGuess, target)));
         console.log('currentGuess',currentGuess);
-        console.log('target',target);
+        //console.log('target',target);
         console.log('clue',clue(currentGuess, target));
         console.log('describe',describeClue(clue(currentGuess, target)));
         //from the describe, lets build a query
-        if(user){
+        if(user && currentGuess.length == 5){
           let cObj = JSON.parse(JSON.stringify(queryObj)); //quick clone 
           console.log('cObj',cObj)
           let clu = clue(currentGuess, target);
@@ -275,6 +275,14 @@ function Game(props: GameProps) {
             }
 
           })
+          //make sure we dont have 'needed' letters in the 'mustNotHave'
+          let newMNHL: string[] = [];
+          cObj.mustNotHaveLetters.forEach((ltr:string)=>{
+            if(cObj.mustHaveLetters.indexOf(String(ltr)) < 0){
+              newMNHL.push(ltr);
+            }
+          });
+          cObj.mustNotHaveLetters = newMNHL;
           setQueryObj(cObj);
           user.functions.queryMongoDB(cObj).then(x=>{console.log('x',x)});
         }

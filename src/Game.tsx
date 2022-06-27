@@ -167,6 +167,26 @@ function Game(props: GameProps) {
     setHint("");
     setGuesses([]);
     setCurrentGuess("");
+    sessionStorage.clear();
+    setQueryObj({
+      "resultLimit": 100,
+      "mustHaveLetters" : [],
+      "mustNotHaveLetters" : [],
+      "badPositions" : {
+        "0" : [],
+        "1" : [],
+        "2" : [],
+        "3" : [],
+        "4" : []
+      },
+      "goodPositions" : {
+        "0" : null,
+        "1" : null,
+        "2" : null,
+        "3" : null,
+        "4" : null
+      }
+    });
     setGameState(GameState.Playing);
     setGameNumber((x) => x + 1);
   };
@@ -284,7 +304,11 @@ function Game(props: GameProps) {
           });
           cObj.mustNotHaveLetters = newMNHL;
           setQueryObj(cObj);
-          user.functions.queryMongoDB(cObj).then(x=>{console.log('x',x)});
+          user.functions.queryMongoDB(cObj).then(x=>{
+            console.log('x',x)
+            sessionStorage.setItem('guesses-'+guesses.length ,JSON.stringify(x[0].guesses));
+            sessionStorage.setItem('guessNum',String(guesses.length));
+          });
         }
 
       }
